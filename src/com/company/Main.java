@@ -2,262 +2,323 @@ package com.company;
 
 import java.util.*;
 
+/**
+ * +===================================+
+ * |          |           |     8      |
+ * |     5    |    6      |_Secret Rm)_|
+ * |(Kitchen) | (dinning) |     7      |
+ * |_____ ____|___________|__(Vault)___|
+ * |          |           |            |
+ * |    2     |    3      |     4      |
+ * |(Front Rm)| (Library) | (Parlor)   |
+ * |__________|_____ _____|____________|
+ * |          |
+ * |     1    |
+ * | (Foyer)  |
+ * |_____ ____|
+ * *       North
+ * * West         East
+ * *       South
+ */
 public class Main {
     static double currentGold = 0;
-    //    static boolean hasEntered;
-    static List<Integer> enteredRoom = new ArrayList<>();
-    static Map<Integer, String> castleMap = new HashMap<>();
+    static Map<Integer, Boolean> castleMap = new HashMap<>();
     static Map<Integer, String> roomItems = new HashMap<>();
-    static List<String> acquiredItems = new ArrayList<>();
-    static boolean foyerEntered = false;
-    static boolean isFoyerEntered = true;
-    static boolean libraryEntered = false;
-    static boolean isLibraryEntered = true;
-    static boolean frontRoomEntered = false;
-    static boolean isFrontRoomEntered = true;
-    static boolean kitchenEntered = false;
-    static boolean isKitchenEntered = true;
-    static boolean diningRoomEntered = false;
-    static boolean isDiningRoomEntered = true;
-    static boolean parlorEntered = false;
-    static boolean isParlorEntered = true;
-    static boolean vaultEntered = false;
-    static boolean isVaultEntered = true;
+    static Map<Integer, Double> money = new HashMap<>();
+    static boolean isSecretRoomUnlocked = false;
+    static int count = 0;
+    static double robbedTotal = 0;
 
     public static void main(String[] args) {
         // write your code here
-        String answer;
-        int userInput;
-        castleMap.put(1, "Foyer");
-        castleMap.put(2, "Library");
-        castleMap.put(3, "Kitchen");
-        castleMap.put(4, "Vault");
-        castleMap.put(5, "Front Room");
-        castleMap.put(6, "Dining Room");
-        castleMap.put(7, "Parlor");
-        castleMap.put(8, "Secret Room");
-
-        roomItems.put(1, "Dead Scorpion");
-        roomItems.put(2, "Spiders");
-        roomItems.put(3, "Bats");
-        roomItems.put(4, "Skeletons");
-        roomItems.put(5, "Piano");
-        roomItems.put(6, "Dust");
-        roomItems.put(7, "Empty Box");
-        roomItems.put(8, "Treasure");
-        roomItems.put(9, "Piles of Gold");
-
-        do {
-            Welcome();
-            userInput = new Scanner(System.in).nextInt();
-            if (userInput == 1) {
-                Foyer();
-                FoyerDirection();
-                userInput = new Scanner(System.in).nextInt();
-                switch (userInput) {
-                    case 1:
-                        Foyer();
-                        FoyerDirection();
-                        break;
-                    case 2:
-                        Library();
-                        LibraryDirection();
-                        break;
-                    case 3:
-                        Kitchen();
-                        KitchenDirection();
-                        break;
-                    case 6:
-                        DiningRoom();
-                        DiningRoomDirection();
-                        break;
-                    default:
-                        System.out.println("Invalid selection");
-                }
-            } else if (userInput == 5) {
-//                    enteredRoom.add(userInput);
-                FrontRoom();
-                FoyerDirection();
-            } else {
-                System.out.println("invalid number");
-            }
-
-
-            System.out.println("Do you want to stop the game? If yes, press q");
-            answer = new Scanner(System.in).nextLine();
-        } while (!answer.equalsIgnoreCase("q"));
-        System.out.println("Your current gold is: $" + String.format("%.2f", currentGold));
-        System.out.print("You have met: ");
-        acquiredItems.forEach(s -> System.out.print(s + " "));
+        Welcome();
+        Foyer();
     }
-
-    private static void EnterByFoyer() {
-        int userInput;
-
-
-//        while (userInput<9) {
-//            if (userInput == 2) {
-//                Library();
-//                LibraryDirection();
-//                userInput = new Scanner(System.in).nextInt();
-//                if (userInput == 1) {
-//                    Foyer();
-//                    FoyerDirection();
-//                }
-//                userInput = new Scanner(System.in).nextInt();
-//                if (userInput == 2) {
-//                    Library();
-//                    LibraryDirection();
-//                }
-//                userInput = new Scanner(System.in).nextInt();
-//
-//            }
-//            if (userInput == 5) {
-//                FrontRoom();
-//
-//            }
-//        }
-    }
-
 
     public static void Welcome() {
-        System.out.println("Welcome to the castle");
-        System.out.println("*********************");
-        System.out.println("Which room to you want to enter? Press 1 for Foyer and 5 for Front Room");
-        System.out.println("You can enter the castle through Foyer or Front Room only");
+        System.out.println("\t Welcome to the castle");
+        System.out.println("\t *********************");
+        System.out.println("WARNING: THIS CASTLE HAS MANY TROLLS");
+        System.out.println(" =>YOU CAN BE ROBBED MANY TIMES<=");
     }
 
-    private static double computeGold() {
-        double gold;
-        double min = 0;
-        double max = 1000;
-        gold = min + (max - min) * new Random().nextDouble();
-        System.out.println("This room has $" + String.format("%.2f", gold));
-        currentGold += gold;
-        System.out.println("Your current gold is: $" + String.format("%.2f", currentGold));
-        return currentGold;
+    private static void hasGold() {
+        System.out.println("Your total gold right now $" + String.format("%.2f", currentGold));
     }
 
-    private static double hasGold() {
-        return currentGold;
+    private static void computeGold(int room) {
+        int troll = 1 + new Random().nextInt(7);
+        if (!money.containsKey(room)) {
+            double gold;
+            double min = 0;
+            double max = 1000;
+            gold = min + (max - min) * new Random().nextDouble();
+            System.out.println("This room has $" + String.format("%.2f", gold));
+            money.put(room, gold);
+            currentGold += gold;
+            System.out.println("Your current gold is: $" + String.format("%.2f", currentGold));
+
+        }
+        if (troll == room) {
+            robbedTotal += currentGold;
+            currentGold -= currentGold;
+            System.out.println("\tT.T YOU HAVE BEEN ROBBED BY A TROLL T.T");
+            count++;
+            hasGold();
+        }
+
     }
 
     private static void Foyer() {
-
-        if (foyerEntered == false) {
-            System.out.println("You are in the Foyer room");
-            computeGold();
-            System.out.println("You have met " + roomItems.get(1));
-            acquiredItems.add(roomItems.get(1));
-            foyerEntered = true;
-            enteredRoom.add(1);
+        String userInput;
+        System.out.println("\tYou are now in the FOYER room");
+        System.out.println("This room has a: DEAD SCORPION");
+        castleMap.put(1, true);
+        roomItems.put(1, "Dead Scorpion");
+        computeGold(1);
+        while (true) {
+            direction(1);
+            System.out.println("Type q to stop the game");
+            hasGold();
+            userInput = new Scanner(System.in).nextLine();
+            if (userInput.equalsIgnoreCase("n") || userInput.equalsIgnoreCase("north")) {
+                FrontRoom();
+            }
+            if (userInput.equalsIgnoreCase("q")) {
+                quit();
+            }
         }
-
-        if (isFoyerEntered != true) {
-            System.out.println("You are in the Foyer room");
-            System.out.println("Your current gold is: $" + String.format("%.2f", hasGold()));
-            System.out.println("You have met " + roomItems.get(1));
-        }
-
     }
-
-    private static void FoyerDirection() {
-        System.out.println("Your next direction can be " + castleMap.get(2) + " or " + castleMap.get(5));
-        System.out.println("Enter 2 to go to " + castleMap.get(2) + " or 5 to go to " + castleMap.get(5));
-
-    }
-
 
     private static void Library() {
-        System.out.println("You have entered the Library");
-        if (libraryEntered == false) {
-            System.out.println("You are in the Library");
-            computeGold();
-            System.out.println("You have met " + roomItems.get(2));
-            acquiredItems.add(roomItems.get(2));
-            libraryEntered = true;
-            enteredRoom.add(2);
-        }
-        if (isLibraryEntered != true) {
-            System.out.println("You are in the Library");
-            System.out.println("Your current gold is: $" + String.format("%.2f", hasGold()));
-            System.out.println("You have met " + roomItems.get(2));
+        String userInput;
+        System.out.println("\tYou are now in the LIBRARY");
+        System.out.println("This room has a: SPIDERS");
+        castleMap.put(3, true);
+        roomItems.put(3, "Spiders");
+        computeGold(3);
+        while (true) {
+            direction(1);
+            direction(2);
+            direction(3);
+            System.out.println("Type q to stop the game");
+            hasGold();
+            userInput = new Scanner(System.in).nextLine();
+            if (userInput.equalsIgnoreCase("n") || userInput.equalsIgnoreCase("north")) {
+                DiningRoom();
+            }
+            if (userInput.equalsIgnoreCase("w") || userInput.equalsIgnoreCase("west")) {
+                FrontRoom();
+            }
+            if (userInput.equalsIgnoreCase("e") || userInput.equalsIgnoreCase("east")) {
+                Parlor();
+            }
+            if (userInput.equalsIgnoreCase("q")) {
+                quit();
+            }
         }
     }
 
-    private static void LibraryDirection() {
-        System.out.println("Your next direction can be " + castleMap.get(1) + " or " + castleMap.get(3) + " or " + castleMap.get(6));
-        System.out.println("Enter 1 to go to " + castleMap.get(1) + " or 3 to go to " + castleMap.get(3) + " or 6 to go to " + castleMap.get(6));
+    private static void Parlor() {
+        String userInput;
+        System.out.println("\tYou are now in the PARLOR");
+        System.out.println("This room has a: TREASURE CHEST");
+        castleMap.put(4, true);
+        roomItems.put(4, "Treasure Chest");
+        computeGold(4);
+        while (true) {
+            direction(1);
+            direction(2);
+            System.out.println("Type q to stop the game");
+            hasGold();
+            userInput = new Scanner(System.in).nextLine();
+            if (userInput.equalsIgnoreCase("n") || userInput.equalsIgnoreCase("north")) {
+                Vault();
+            }
+            if (userInput.equalsIgnoreCase("w") || userInput.equalsIgnoreCase("west")) {
+                Library();
+            }
+            if (userInput.equalsIgnoreCase("q")) {
+                quit();
+            }
+        }
     }
-
 
     private static void DiningRoom() {
-        System.out.println("You have entered the Dining Room");
-        if (diningRoomEntered == false) {
-            System.out.println("You are in the Dining Room");
-            computeGold();
-            System.out.println("You have met " + roomItems.get(6) + " and " + roomItems.get(7));
-            acquiredItems.add(roomItems.get(6));
-            acquiredItems.add(roomItems.get(7));
-            diningRoomEntered = true;
-            enteredRoom.add(6);
-        }
-        if (isDiningRoomEntered != true) {
-            System.out.println("You are in the Library");
-            System.out.println("Your current gold is: $" + String.format("%.2f", hasGold()));
-            System.out.println("You have met " + roomItems.get(6) + " and " + roomItems.get(7));
+        String userInput;
+        System.out.println("\tYou are now in the DINING ROOM");
+        System.out.println("This room has a: DUST AND EMPTY BOX");
+        castleMap.put(6, true);
+        roomItems.put(6, "Dust and Empty Box");
+        computeGold(6);
+        while (true) {
+            direction(2);
+            direction(3);
+            direction(4);
+            System.out.println("Type q to stop the game");
+            hasGold();
+            userInput = new Scanner(System.in).nextLine();
+            if (userInput.equalsIgnoreCase("s") || userInput.equalsIgnoreCase("south")) {
+                Library();
+            }
+            if (userInput.equalsIgnoreCase("w") || userInput.equalsIgnoreCase("west")) {
+                Kitchen();
+            }
+            if (userInput.equalsIgnoreCase("e") || userInput.equalsIgnoreCase("east")) {
+                Vault();
+            }
+            if (userInput.equalsIgnoreCase("q")) {
+                quit();
+            }
         }
     }
 
-    private static void DiningRoomDirection() {
-        System.out.println("Your next direction can be " + castleMap.get(2) + " or " + castleMap.get(5) + " or " + castleMap.get(7));
-        System.out.println("Enter 2 to go to " + castleMap.get(2) + " or 5 to go to " + castleMap.get(5) + " or 7 to go to " + castleMap.get(7));
+    private static void Vault() {
+        String userInput;
+        System.out.println("\tYou are now in the VAULT");
+        System.out.println("This room has a: THREE SKELETONS");
+        castleMap.put(7, true);
+        roomItems.put(7, "Three Skeletons");
+        computeGold(7);
+        while (true) {
+            int random = new Random().nextInt(4);
+            if (random == 0) {
+                System.out.println("You have unlocked the secret room");
+                isSecretRoomUnlocked = true;
+            }
+            if (isSecretRoomUnlocked) {
+                direction(1);
+            }
+            direction(2);
+            direction(4);
+            System.out.println("Type q to stop the game");
+            hasGold();
+            userInput = new Scanner(System.in).nextLine();
+            if (isSecretRoomUnlocked) {
+                if (userInput.equalsIgnoreCase("n") || userInput.equalsIgnoreCase("north")) {
+                    SecretRoom();
+                }
+            }
+            if (userInput.equalsIgnoreCase("w") || userInput.equalsIgnoreCase("west")) {
+                DiningRoom();
+            }
+            if (userInput.equalsIgnoreCase("s") || userInput.equalsIgnoreCase("south")) {
+                Parlor();
+            }
+            if (userInput.equalsIgnoreCase("q")) {
+                quit();
+            }
+        }
+    }
+
+    private static void SecretRoom() {
+        String userInput;
+        System.out.println("\tYou are now in the SECRET ROOM");
+        System.out.println("This room has a: PILES OF GOLD");
+        castleMap.put(8, true);
+        roomItems.put(8, "Piles of gold");
+        computeGold(8);
+        while (true) {
+            direction(3);
+            direction(4);
+            System.out.println("Type q to stop the game");
+            hasGold();
+            userInput = new Scanner(System.in).nextLine();
+            if (userInput.equalsIgnoreCase("e") || userInput.equalsIgnoreCase("east")) {
+                DiningRoom();
+            }
+            if (userInput.equalsIgnoreCase("s") || userInput.equalsIgnoreCase("south")) {
+                Vault();
+            }
+            if (userInput.equalsIgnoreCase("q")) {
+                quit();
+            }
+        }
     }
 
     private static void FrontRoom() {
-        System.out.println("You have entered the Front Room");
-        if (frontRoomEntered == false) {
-            System.out.println("You are in the Front Room");
-            computeGold();
-            System.out.println("You have met " + roomItems.get(5));
-            acquiredItems.add(roomItems.get(5));
-            frontRoomEntered = true;
-            enteredRoom.add(5);
+        String userInput;
+        System.out.println("\tYou are now in the FRONT ROOM");
+        System.out.println("This room has a: PIANO");
+        castleMap.put(2, true);
+        roomItems.put(2, "Piano");
+        computeGold(2);
+        while (true) {
+            direction(1);
+            direction(3);
+            direction(4);
+            System.out.println("Type q to stop the game");
+            hasGold();
+            userInput = new Scanner(System.in).nextLine();
+            if (userInput.equalsIgnoreCase("n") || userInput.equalsIgnoreCase("north")) {
+                Kitchen();
+            }
+            if (userInput.equalsIgnoreCase("e") || userInput.equalsIgnoreCase("east")) {
+                Library();
+            }
+            if (userInput.equalsIgnoreCase("s") || userInput.equalsIgnoreCase("south")) {
+                Foyer();
+            }
+            if (userInput.equalsIgnoreCase("q")) {
+                quit();
+            }
         }
-        if (isFrontRoomEntered != true) {
-            System.out.println("You are in the Library");
-            System.out.println("Your current gold is: $" + String.format("%.2f", hasGold()));
-            System.out.println("You have met " + roomItems.get(5));
-        }
-    }
-
-    private static void FrontRoomDirection() {
-        System.out.println("Your next direction can be " + castleMap.get(1) + " or " + castleMap.get(6));
-        System.out.println("Enter 1 to go to " + castleMap.get(1) + " or 6 to go to " + castleMap.get(6));
-
     }
 
     private static void Kitchen() {
-        System.out.println("You have entered the Kitchen");
-        if (kitchenEntered == false) {
-            System.out.println("You are in the Kitchen");
-            computeGold();
-            System.out.println("You have met " + roomItems.get(3));
-            acquiredItems.add(roomItems.get(3));
-            kitchenEntered = true;
-            enteredRoom.add(3);
-        }
-        if (isKitchenEntered != true) {
-            System.out.println("You are in the Library");
-            System.out.println("Your current gold is: $" + String.format("%.2f", hasGold()));
-            System.out.println("You have met " + roomItems.get(3));
+        String userInput;
+        System.out.println("\tYou are now in the KITCHEN");
+        System.out.println("This room has a: BATS");
+        castleMap.put(5, true);
+        roomItems.put(5, "Bats");
+        computeGold(5);
+        while (true) {
+            direction(3);
+            direction(4);
+            System.out.println("Type q to stop the game");
+            hasGold();
+            userInput = new Scanner(System.in).nextLine();
+            if (userInput.equalsIgnoreCase("e") || userInput.equalsIgnoreCase("east")) {
+                DiningRoom();
+            }
+            if (userInput.equalsIgnoreCase("s") || userInput.equalsIgnoreCase("south")) {
+                FrontRoom();
+            }
+            if (userInput.equalsIgnoreCase("q")) {
+                quit();
+            }
         }
     }
 
-    private static void KitchenDirection() {
-        System.out.println("Your next direction can be " + castleMap.get(2) + " or " + castleMap.get(4) + " or " + castleMap.get(7));
-        System.out.println("Enter 2 to go to " + castleMap.get(2) + " or 4 to go to " + castleMap.get(4) + " or 7 to go to " + castleMap.get(7));
+    private static void direction(int number) {
+        if (number == 1) {
+            System.out.println("Type N or North to go to the North");
+        }
+        if (number == 2) {
+            System.out.println("Type W or West to go to the West");
+        }
+        if (number == 3) {
+            System.out.println("Type E or East to go to the East");
+        }
+        if (number == 4) {
+            System.out.println("Type S or South to go to the South");
+        }
     }
 
-
+    private static void quit() {
+        int random = new Random().nextInt(4);
+        if (random == 3) {
+            System.out.println("****************************************");
+            System.out.println("\t A GHOST HAVE FOLLOWED YOU");
+        }
+        System.out.println("**************************************************");
+        System.out.println("\tYOU VISITED " + castleMap.size() + " ROOM");
+        System.out.println("\tYOU EARN $" + String.format("%.2f", currentGold));
+        System.out.println("\tYOU HAVE BEEN ROBBED $" + String.format("%.2f", robbedTotal) + " AFTER " + count + " TIMES");
+        System.out.println("\tITEMS YOU FOUND: ");
+        roomItems.forEach((integer, s) -> System.out.println("\t" + integer + "/ " + s));
+        System.out.println("\t\t\tEND GAME");
+        System.out.println("**************************************************");
+        System.exit(0);
+    }
 }
